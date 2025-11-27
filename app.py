@@ -38,7 +38,7 @@ class RobotPlotterApp(tk.Tk):
         self._job_output = None
         self.is_generating = False
 
-        # --- Variables Tkinter (définies ici pour être sûres d'exister) ---
+        # --- Tkinter variables (defined here to be sure they exist) ---
         self.connection_type_var = tk.StringVar(value="Telnet")
         self.serial_port_var = tk.StringVar(value="")
         self.baudrate_var = tk.StringVar(value="115200")
@@ -63,7 +63,7 @@ class RobotPlotterApp(tk.Tk):
         self.host_var = tk.StringVar(value="192.168.0.1")
         self.port_var = tk.StringVar(value="23")
 
-        # Variables "cachées" ou non affichées dans le panel haut
+        # "Hidden" variables or not displayed in the top panel
         self.inch_var = tk.BooleanVar(value=False)
         self.min_gcode_var = tk.BooleanVar(value=False)
         self.no_pre_var = tk.BooleanVar(value=False)
@@ -71,7 +71,7 @@ class RobotPlotterApp(tk.Tk):
         
         self.auto_gen_var = tk.BooleanVar(value=True)
 
-        # --- Geometry interne ---
+        # --- Internal geometry ---
         self.r_xmin = 0.0
         self.r_xmax = 100.0
         self.r_ymin = -50.0
@@ -85,23 +85,23 @@ class RobotPlotterApp(tk.Tk):
         self.work_width_mm = 0.0
         self.work_height_mm = 0.0
 
-        # --- Construction UI ---
+        # --- UI construction ---
         self._build_ui()
 
-        # --- Chargement Config ---
+        # --- Load config ---
         self._load_settings_from_properties()
         if hasattr(self, "_update_connection_mode_ui"):
             self._update_connection_mode_ui()
-        # --- Binds & Init ---
+        # --- Binds & init ---
         self._bind_events()
         self._update_workspace()
 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
-    # ---------- Persistance ----------
+    # ---------- Persistence ----------
 
     def _load_settings_from_properties(self):
-        """Charge les paramètres."""
+        """Load settings."""
         config = configparser.ConfigParser()
         if not CONFIG_FILE.exists():
             return
@@ -111,7 +111,7 @@ class RobotPlotterApp(tk.Tk):
             return
         s = config["RobotPlotter"]
 
-        # Paramètres généraux
+        # General settings
         self.font_var.set(s.get("font", self.font_var.get()))
         self.char_height_var.set(s.get("char_height", self.char_height_var.get()))
         self.feed_var.set(s.get("feed", self.feed_var.get()))
@@ -127,7 +127,7 @@ class RobotPlotterApp(tk.Tk):
         self.align_var.set(s.get("align", self.align_var.get()))
         self.precision_var.set(s.get("precision", self.precision_var.get()))
         
-        # Paramètres de connexion
+        # Connection settings
         self.connection_type_var.set(s.get("connection_type", "Telnet"))
         self.host_var.set(s.get("host", self.host_var.get()))
         self.port_var.set(s.get("port", self.port_var.get()))
@@ -135,7 +135,7 @@ class RobotPlotterApp(tk.Tk):
         self.baudrate_var.set(s.get("baudrate", "115200"))
 
     def _save_settings_to_properties(self):
-        """Sauvegarde les paramètres."""
+        """Save settings."""
         config = configparser.ConfigParser()
         config["RobotPlotter"] = {
             "font": self.font_var.get(),
@@ -170,7 +170,7 @@ class RobotPlotterApp(tk.Tk):
     # ---------- UI Construction ----------
 
     def _build_ui(self):
-        # Couleurs globales (garder les mêmes qu’en haut si possible)
+        # Global colors (keep the same as above if possible)
         BG_MAIN = "#f8f9fa"
         BG_PANEL = "#ffffff"
         TEXT = "#212529"
@@ -178,27 +178,27 @@ class RobotPlotterApp(tk.Tk):
 
         self.configure(bg=BG_MAIN)
 
-        # Conteneur principal du haut
+        # Main top container
         params_frame = tk.Frame(self, bg=BG_MAIN)
         params_frame.pack(side=tk.TOP, fill=tk.X, padx=0, pady=(0, 5))
 
-        # Panel haut (robot + texte + connexion)
+        # Top panel (robot + text + connection)
         build_top_controls(self, params_frame)
 
-        # --- Zone centrale : texte + preview ---
+        # --- Central area: text + preview ---
         main_frame = tk.Frame(self, bg=BG_MAIN)
         main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        # On remplace PanedWindow brut par un simple Frame + deux colonnes flexibles
+        # Replace raw PanedWindow with a simple Frame + two flexible columns
         main_frame.grid_columnconfigure(0, weight=3, uniform="col")
         main_frame.grid_columnconfigure(1, weight=2, uniform="col")
         main_frame.grid_rowconfigure(0, weight=1)
 
-        # ---- Colonne gauche : Input / Output ----
+        # ---- Left column: Input / Output ----
         left_panel = tk.Frame(main_frame, bg=BG_MAIN)
         left_panel.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
 
-        # Bloc Input
+        # Input block
         input_frame = tk.LabelFrame(
             left_panel, text=" Input text ",
             bg=BG_PANEL, fg=TEXT, bd=1, relief="solid",
@@ -206,7 +206,7 @@ class RobotPlotterApp(tk.Tk):
         )
         input_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 6))
 
-        # Label interne optionnel
+        # Optional inner label
         # tk.Label(input_frame, text="Text to plot", bg=BG_PANEL, fg=TEXT, font=("Segoe UI", 9, "italic")).pack(anchor="w", padx=8, pady=(4, 0))
 
         self.input_text = scrolledtext.ScrolledText(
@@ -215,7 +215,7 @@ class RobotPlotterApp(tk.Tk):
         )
         self.input_text.pack(fill=tk.BOTH, expand=True, padx=6, pady=(4, 0))
 
-        # Toolbar sous l’input
+        # Toolbar under the input
         input_toolbar = tk.Frame(input_frame, bg=BG_PANEL)
         input_toolbar.pack(fill=tk.X, padx=6, pady=(4, 6))
 
@@ -239,7 +239,7 @@ class RobotPlotterApp(tk.Tk):
             font=("Segoe UI", 9, "bold"), cursor="hand2"
         ).pack(side=tk.RIGHT)
 
-        # Bloc Output
+        # Output block
         output_frame = tk.LabelFrame(
             left_panel, text=" Generated G-code ",
             bg=BG_PANEL, fg=TEXT, bd=1, relief="solid",
@@ -255,7 +255,7 @@ class RobotPlotterApp(tk.Tk):
 
         self.output_text.tag_configure("current_line", background="#fff3cd")
 
-        # ---- Colonne droite : Preview ----
+        # ---- Right column: Preview ----
         right_panel = tk.Frame(main_frame, bg=BG_MAIN)
         right_panel.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
 
@@ -266,7 +266,7 @@ class RobotPlotterApp(tk.Tk):
         )
         preview_frame.pack(fill=tk.BOTH, expand=True)
 
-        # Slider de progression
+        # Progress slider
         slider_frame = tk.Frame(preview_frame, bg=BG_PANEL)
         slider_frame.pack(fill=tk.X, padx=8, pady=(6, 2))
 
@@ -292,7 +292,7 @@ class RobotPlotterApp(tk.Tk):
         )
         self.progress_scale.pack(fill=tk.X, pady=(2, 4))
 
-        # Canvas pour la prévisualisation du robot
+        # Canvas for robot preview
         canvas_container = tk.Frame(preview_frame, bg=BG_PANEL)
         canvas_container.pack(fill=tk.BOTH, expand=True, padx=8, pady=(0, 8))
 
@@ -310,7 +310,7 @@ class RobotPlotterApp(tk.Tk):
         self.output_text.bind("<<Modified>>", self._on_output_modified)
         self.input_text.bind("<<Modified>>", self._on_input_modified)
 
-        # Triggers pour recalculer la géométrie
+        # Triggers to recalculate geometry
         self.char_height_var.trace_add("write", lambda *args: self._update_workspace())
         self.xmin_var.trace_add("write", lambda *args: self._update_workspace())
         self.xmax_var.trace_add("write", lambda *args: self._update_workspace())
@@ -358,8 +358,8 @@ class RobotPlotterApp(tk.Tk):
         self.text_y_max = self.robot_y_max_effective - self.margin
         self.text_y_min = self.r_ymin + self.margin
 
-        # Calcul du canvas basé sur le DOMAINE ROBOT COMPLET (+ marge visuelle)
-        # On ne réduit PAS le canvas au texte, on montre tout le robot
+        # Compute canvas based on the FULL ROBOT WORKSPACE (+ visual margin)
+        # Do NOT shrink the canvas to the text; show the entire robot workspace
         self.work_width_mm = (self.r_xmax - self.r_xmin) + 2 * VISUAL_MARGIN_MM
         self.work_height_mm = (self.r_ymax - self.r_ymin) + 2 * VISUAL_MARGIN_MM
 
@@ -411,7 +411,7 @@ class RobotPlotterApp(tk.Tk):
         self.update_slider_range()
         self.draw_preview(limit=len(self.segments))
         
-        # Active le bouton Start si du G-code valide est présent
+        # Enable Start button if valid G-code is present
         if gcode.strip():
             self.btn_start.config(state=tk.NORMAL)
         else:
@@ -437,14 +437,14 @@ class RobotPlotterApp(tk.Tk):
             self.canvas.create_line(x1, y1, x2, y2, fill="#333333")
 
     def _draw_workspace_overlay(self):
-        # Cadre du ROBOT (complet)
+        # ROBOT frame (full workspace)
         rx0, ry0 = self.to_canvas(self.r_xmin, self.r_ymin)
         rx1, ry1 = self.to_canvas(self.r_xmax, self.r_ymax)
         self.canvas.create_rectangle(rx0, ry1, rx1, ry0, outline="#999999", width=2, fill="white")
         
         # --- FIX ---
-        # On recrée les coordonnées de la marge "pure" (sans char_height)
-        # pour retrouver l'affichage de la V1.
+        # Recreate coordinates of the "pure" margin area (without char_height)
+        # to get back the display from V1.
         mx_min = self.r_xmin + self.margin
         mx_max = self.r_xmax - self.margin
         my_min = self.r_ymin + self.margin
@@ -457,9 +457,9 @@ class RobotPlotterApp(tk.Tk):
 
 
     def to_canvas(self, x, y):
-        # Projette les coordonnées robot sur le canvas
-        # Origine canvas = (r_xmin - VISUAL_MARGIN, r_ymax + VISUAL_MARGIN)
-        # Y robot inversé
+        # Project robot coordinates onto the canvas
+        # Canvas origin = (r_xmin - VISUAL_MARGIN, r_ymax + VISUAL_MARGIN)
+        # Robot Y axis inverted
         cx_mm = (x - self.r_xmin) + VISUAL_MARGIN_MM
         cy_mm = (self.r_ymax - y) + VISUAL_MARGIN_MM
         return cx_mm * MM_TO_PX, cy_mm * MM_TO_PX

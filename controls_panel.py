@@ -4,9 +4,7 @@ from tkinter import ttk
 from app_types import HF_FONTS
 
 def build_top_controls(app, parent: tk.Widget):
-    """
-    UI moderne avec couleurs flattes et clean.
-    """
+  
     
     # Couleurs modernes
     BG_MAIN = "#f8f9fa"
