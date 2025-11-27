@@ -2,7 +2,7 @@
 Robot Text Plotter – HF2Gcode GUI
 =================================
 
-Robot Text Plotter is a Python GUI application to control a drawing robot (GRBL‑style XY plotter) from text, using the external tool “hf2gcode” by Andreas Weber. It converts text to G‑code with Hershey fonts, previews the toolpath, and sends the resulting G‑code to the robot over Telnet or a serial (COM) port.[1]
+Robot Text Plotter is a Python GUI application to control a drawing robot (GRBL‑style XY plotter) from text, using the external tool “hf2gcode” by Andreas Weber. It converts text to G‑code with Hershey fonts, previews the toolpath, and sends the resulting G‑code to the robot over Telnet or a serial (COM) port.
 It has been tested with midTbot : https://github.com/bdring/midTbot_esp32
 
 Main features
@@ -57,8 +57,6 @@ Key files in this repository:
 - `RobotPlotter.properties`  
   INI‑style configuration file automatically written on exit and read on startup (font, char height, robot area, connection mode, etc.).
 
-- `requirements.txt`  
-  Python dependencies for this project (pyserial, plus standard library).
 
 External dependency: hf2gcode
 -----------------------------
@@ -68,7 +66,7 @@ This GUI does not re‑implement the text‑to‑G‑code conversion logic itsel
 You must install hf2gcode separately for this GUI to work correctly.
 
 hf2gcode repository (original project):  
-https://github.com/Andy1978/hf2gcode[1]
+https://github.com/Andy1978/hf2gcode
 
 hf2gcode in short:
 - Command‑line tool written in C.
@@ -97,10 +95,6 @@ Requirements
   - `pyserial`
   - plus standard library modules (`tkinter`, `socket`, `threading`, `configparser`, `pathlib`, etc.).
 
-All Python dependencies are listed in `requirements.txt`. Install them with:
-
-    pip install -r requirements.txt
-
 You also need:
 - A working build of hf2gcode available on your system (see above).
 - For real hardware:
@@ -112,19 +106,12 @@ Installation
 
 1. Clone this repository:
 
-    git clone https://github.com/<your-user>/<your-repo>.git
-    cd <your-repo>
-
 2. (Optional) Create and activate a virtual environment:
 
     python -m venv .venv
     source .venv/bin/activate       # Windows: .venv\Scripts\activate
 
-3. Install Python dependencies:
-
-    pip install -r requirements.txt
-
-4. Install and configure hf2gcode:
+3. Install and configure hf2gcode:
 
    - Clone and build hf2gcode following its README.
    - Ensure the `hf2gcode` binary is in your `PATH` or update `gcode_generator.py` to point at its exact location.
@@ -212,18 +199,31 @@ Testing serial mode without hardware (Linux)
 
 If you want to test the serial mode without a physical GRBL board, you can emulate a null‑modem cable using `socat`:
 
-1. Create a pair of virtual serial ports:
+With Serial
 
-    socat -d -d pty,raw,echo=0,link=./ttyV0 pty,raw,echo=0,link=./ttyV1
+1. In a terminal (1)
+   socat -d -d pty,raw,echo=0,link=./ttyV0 pty,raw,echo=0,link=./ttyV1
 
-2. In the GUI, set:
+2. In another terminal (2), connect to the other side (`./ttyV1`) and act as a fake GRBL:
+    socat - /dev/pts/Y,raw,echo=0
+
+3. In the GUI, set:
    - Mode: Serial
    - Port: `./ttyV0` or the corresponding `/dev/pts/X` that socat reports
    - Baud: 115200
+     put a input text then start
 
-3. In another terminal, connect to the other side (`./ttyV1`) and act as a fake GRBL:
+   You will see G‑code lines printed, and can answer `ok` followed by Enter to simulate GRBL acknowledgements in terminal (2).
 
-    socat - /dev/pts/Y,raw,echo=0
+With telnet
+
+1.  In a terminal
+   nc -l -p 2300
+
+3. In the GUI, set:
+   - Mode: Telnet
+   - Host: 127.0.0.1 Port:2300
+     put a input text then start
 
    You will see G‑code lines printed, and can answer `ok` followed by Enter to simulate GRBL acknowledgements.
 
@@ -233,7 +233,7 @@ Licensing
 This GUI is intended to be released under an open source license (for example MIT, Apache‑2.0, or GPL‑3.0).  
 Add a `LICENSE` file at the root of the repository with your chosen license text.
 
-Note that hf2gcode itself is licensed under GPLv3 (see its repository for details). Depending on how you integrate hf2gcode (e.g. as an external binary versus linking as a library), GPL compatibility may affect what license you should choose for this GUI. Please review the hf2gcode license and consider your own licensing accordingly.[3][1]
+Note that hf2gcode itself is licensed under GPLv3 (see its repository for details). Depending on how you integrate hf2gcode (e.g. as an external binary versus linking as a library), GPL compatibility may affect what license you should choose for this GUI. Please review the hf2gcode license and consider your own licensing accordingly.
 
 Contributing
 ------------
