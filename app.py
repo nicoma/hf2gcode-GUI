@@ -1,4 +1,5 @@
-# app.py
+#!/usr/bin/env python3
+import os
 import tkinter as tk
 from tkinter import messagebox
 import tkinter.scrolledtext as scrolledtext
@@ -304,6 +305,10 @@ class RobotPlotterApp(tk.Tk):
             width=400, height=600
         )
         self.canvas.pack(fill=tk.BOTH, expand=True)
+        self._install_text_shortcuts()
+        # optionnel
+        self._install_context_menu()
+
 
 
     def _bind_events(self):
@@ -455,6 +460,42 @@ class RobotPlotterApp(tk.Tk):
         
         self.canvas.create_rectangle(tx0, ty1, tx1, ty0, outline="#99ccff", dash=(3, 2), width=1.5)
 
+    def _select_all_text(self, event=None):
+        w = event.widget
+        if isinstance(w, tk.Text):
+            w.tag_add("sel", "1.0", "end-1c")
+            w.mark_set("insert", "1.0")
+            w.see("insert")
+            return "break"
+
+    def _install_text_shortcuts(self):
+        # Ctrl+A = tout sélectionner
+        for seq in ("<Control-a>", "<Control-A>"):
+            self.input_text.bind(seq, self._select_all_text)
+            self.output_text.bind(seq, self._select_all_text)
+
+        # Copier / Couper / Coller via les virtual events Tk
+        for w in (self.input_text, self.output_text):
+            w.bind("<Control-c>", lambda e: (e.widget.event_generate("<<Copy>>"), "break"))
+            w.bind("<Control-x>", lambda e: (e.widget.event_generate("<<Cut>>"), "break"))
+            w.bind("<Control-v>", lambda e: (e.widget.event_generate("<<Paste>>"), "break"))
+
+
+    def _install_context_menu(self):
+        self._text_menu = tk.Menu(self, tearoff=0)
+        self._text_menu.add_command(label="Couper", command=lambda: self.focus_get().event_generate("<<Cut>>"))
+        self._text_menu.add_command(label="Copier", command=lambda: self.focus_get().event_generate("<<Copy>>"))
+        self._text_menu.add_command(label="Coller", command=lambda: self.focus_get().event_generate("<<Paste>>"))
+        self._text_menu.add_separator()
+        self._text_menu.add_command(label="Tout sélectionner", command=lambda: self._select_all_text(type("E",(object,),{"widget": self.focus_get()})()))
+
+        def popup(event):
+            event.widget.focus_set()
+            self._text_menu.tk_popup(event.x_root, event.y_root)
+
+        for w in (self.input_text, self.output_text):
+            w.bind("<Button-3>", popup)  # Windows/Linux (souvent)
+            w.bind("<Button-2>", popup)  # macOS (selon config)
 
     def to_canvas(self, x, y):
         # Project robot coordinates onto the canvas
